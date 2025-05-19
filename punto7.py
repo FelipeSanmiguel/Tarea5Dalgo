@@ -50,4 +50,4 @@ cadenas = ["abc", "bcd", "cde"]
 k = 5
 
 valido = problema_decision(cadenas, k)
-print("¿Existe una supercadena de longitud menor?"+ str(valido))
+print("¿Existe una supercadena de longitud menor?: "+ str(valido))
