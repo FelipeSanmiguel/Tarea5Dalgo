@@ -1,27 +1,27 @@
 from collections import deque
 
-def max_solapamiento(a, b):
-    max_olap = 0
-    min_len = min(len(a), len(b))
-    for i in range(1, min_len + 1):
-        if a[-i:] == b[:i]:
-            max_olap = i
-    return max_olap
+def max_solapamiento(cadena_a, cadena_b):
+    max_solap = 0
+    longitud_min = min(len(cadena_a), len(cadena_b))
+    for i in range(1, longitud_min + 1):
+        if cadena_a[-i:] == cadena_b[:i]:
+            max_solap = i
+    return max_solap
 
-def generar_sucesores(used_list, T_U, cadenas, k, visitados):
+def generar_sucesores(lista_usados, cadena_actual, cadenas, k, visitados):
     sucesores = []
     n = len(cadenas)
     for i in range(n):
-        if i in used_list:
-            continue  # cadena i ya usada
-        s = cadenas[i]
-        olap = max_solapamiento(T_U, s)
-        nueva_T = T_U + s[olap:]
-        nuevo_list = used_list + [i]
-        clave_estado = tuple(sorted(nuevo_list))
-        if len(nueva_T) <= k:
-            if clave_estado not in visitados or len(nueva_T) < visitados[clave_estado]:
-                sucesores.append((nuevo_list, nueva_T))
+        if i in lista_usados:
+            continue  
+        cadena_siguiente = cadenas[i]
+        solapamiento = max_solapamiento(cadena_actual, cadena_siguiente)
+        nueva_cadena = cadena_actual + cadena_siguiente[solapamiento:]
+        nueva_lista_usados = lista_usados + [i]
+        clave_estado = tuple(sorted(nueva_lista_usados))
+        if len(nueva_cadena) <= k:
+            if clave_estado not in visitados or len(nueva_cadena) < visitados[clave_estado]:
+                sucesores.append((nueva_lista_usados, nueva_cadena))
     return sucesores
 
 def problema_decision(cadenas, k):
@@ -30,20 +30,20 @@ def problema_decision(cadenas, k):
     n = len(cadenas)
 
     for i in range(n):
-        s = cadenas[i]
-        used_list = [i]
-        cola.append((used_list, s))
-        visitados[tuple(sorted(used_list))] = len(s)
+        cadena_inicial = cadenas[i]
+        lista_usados = [i]
+        cola.append((lista_usados, cadena_inicial))
+        visitados[tuple(sorted(lista_usados))] = len(cadena_inicial)
 
     while cola:
-        used_list, T_U = cola.popleft()
-        if len(used_list) == n and len(T_U) <= k:
+        lista_usados, cadena_actual = cola.popleft()
+        if len(lista_usados) == n and len(cadena_actual) <= k:
             return True
 
-        for nuevo_list, nueva_T in generar_sucesores(used_list, T_U, cadenas, k, visitados):
-            clave_estado = tuple(sorted(nuevo_list))
-            visitados[clave_estado] = len(nueva_T)
-            cola.append((nuevo_list, nueva_T))
+        for nueva_lista_usados, nueva_cadena in generar_sucesores(lista_usados, cadena_actual, cadenas, k, visitados):
+            clave_estado = tuple(sorted(nueva_lista_usados))
+            visitados[clave_estado] = len(nueva_cadena)
+            cola.append((nueva_lista_usados, nueva_cadena))
 
     return False
 
