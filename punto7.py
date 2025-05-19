@@ -8,19 +8,20 @@ def max_solapamiento(a, b):
             max_olap = i
     return max_olap
 
-def generar_sucesores(used_mask, T_U, cadenas, k, visitados):
+def generar_sucesores(used_list, T_U, cadenas, k, visitados):
     sucesores = []
     n = len(cadenas)
     for i in range(n):
-        if (used_mask & (1 << i)) != 0:
-            continue 
+        if i in used_list:
+            continue  # cadena i ya usada
         s = cadenas[i]
         olap = max_solapamiento(T_U, s)
         nueva_T = T_U + s[olap:]
-        nuevo_mask = used_mask | (1 << i)
+        nuevo_list = used_list + [i]
+        clave_estado = tuple(sorted(nuevo_list))
         if len(nueva_T) <= k:
-            if nuevo_mask not in visitados or len(nueva_T) < visitados[nuevo_mask]:
-                sucesores.append((nuevo_mask, nueva_T))
+            if clave_estado not in visitados or len(nueva_T) < visitados[clave_estado]:
+                sucesores.append((nuevo_list, nueva_T))
     return sucesores
 
 def problema_decision(cadenas, k):
@@ -30,24 +31,25 @@ def problema_decision(cadenas, k):
 
     for i in range(n):
         s = cadenas[i]
-        mask = 1 << i
-        cola.append((mask, s))
-        visitados[mask] = len(s)
+        used_list = [i]
+        cola.append((used_list, s))
+        visitados[tuple(sorted(used_list))] = len(s)
 
     while cola:
-        used_mask, T_U = cola.popleft()
-        if used_mask == (1 << n) - 1 and len(T_U) <= k:
+        used_list, T_U = cola.popleft()
+        if len(used_list) == n and len(T_U) <= k:
             return True
 
-        for nuevo_mask, nueva_T in generar_sucesores(used_mask, T_U, cadenas, k, visitados):
-            visitados[nuevo_mask] = len(nueva_T)
-            cola.append((nuevo_mask, nueva_T))
+        for nuevo_list, nueva_T in generar_sucesores(used_list, T_U, cadenas, k, visitados):
+            clave_estado = tuple(sorted(nuevo_list))
+            visitados[clave_estado] = len(nueva_T)
+            cola.append((nuevo_list, nueva_T))
 
     return False
 
-# Introducir aqui valores
+# Poner aqui valores
 cadenas = ["abc", "bcd", "cde"]
 k = 5
 
 valido = problema_decision(cadenas, k)
-print("¿Existe una supercadena de longitud menor?: "+ str(valido))
+print("Existe una cadena menor?: ", str(valido))
